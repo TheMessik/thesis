@@ -1,0 +1,14 @@
+paramiko==2.0.0
+pycurl
+ajpy
+impacket
+pyopenssl
+cx_Oracle
+mysqlclient
+psycopg2-binary
+pycrypto
+dnspython
+IPy
+pysnmp
+pyasn1
+#pysqlcipher # no python3 compatibility
