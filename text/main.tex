@@ -1,0 +1,62 @@
+\documentclass[english]{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage[backend=bibtex8]{biblatex}
+\addbibresource{references.bib}
+\renewcommand\refname{}
+\renewcommand*{\contentsname}{}
+\graphicspath{{images}}
+
+\title{Enhancing Network Intrusion Detection Robustness via Dataset Augmentation: A CIC-IDS-2017 Case Study
+}
+\author{Jozef Jankaj}
+\date{May 2025}
+
+
+\begin{document}
+	
+\maketitle
+
+\tableofcontents
+	
+	\newpage
+	
+	\section{Introduction}
+	A lot of time has passed since that fateful night of October 29, 1969, when the first inter-network communication took place through the ARPANET link. In his statement in an interview with Gregory Gromov
+	
+	\begin{center} 
+		"Then we typed the G, and the system crashed… Yet a revolution had begun” \cite{kleinrock}
+	\end{center}
+	
+	who knows if prof. Leonard Kleinrock had fully realized just how massive the revolution was going to be. 
+	Since then, the internet has grown exponentially: from a small group of four nodes, through the invention of the World Wide Web by Sir Tim Bernes-Lee for the sharing of academic knowledge, via the dot-com bubble of the 2000's, to an inseparable part of our lives. As our lives have moved into cyberspace, so have threats against our privacy. We no longer face only the criminals on the streets, but also a threat from cybercriminals on the other side of the world. As such, protection measures have been developed, chief among which are Network Intrusion Detection Systems (NIDS). These systems monitor traffic within the network and send out alerts when malicious traffic is encountered, or even cut the connection altogether. 
+	
+	In recent years, NIDS research has explored how the capabilities of machine learning methods can be utilized to protect our networks. While many papers claim excellent performance and groundbreaking contributions, the field of machine learning-based NIDS (ML-NIDS) has been met with skepticism by practitioners \cite{sok_nids_assessment}, chief among them being the lack of evidence of generalization to different networks.
+	
+	The aim of this work is to address this complaint by verifying a method of enhancing robustness of NIDS datasets through dataset augmentation. As a point of study, we take the CIC-2017 dataset \cite{cic_2017} created by the Canadian Institute for Cybersecurity. 
+	
+	This work is structured as follows: In Section 2, we explore the literature surrounding ML-NIDS, illustrating current methods and datasets used in the field. In Section 3, we formulate a hypothesis behind the poor generalization performance of ML-NIDS models, explore the CIC-2017 dataset in-depth and recreate it using ConCap \cite{concap}. In Section 4, we present results of our testing. Finally, in Section 5, we draw conclusions and reflect on future work.
+	
+	\newpage
+	\include{lit_study}
+	
+	\newpage
+	\include{methodology}
+	
+	\newpage
+	\include{results}
+	
+	\newpage
+	\include{conclusion}
+	
+	\include{extensions}
+	
+	\newpage
+	\section{References}
+	\printbibliography[heading=none]
+	\newpage
+	\section{Appendices}
+	
+	
+\end{document}

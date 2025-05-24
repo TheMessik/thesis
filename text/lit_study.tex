@@ -1,0 +1,69 @@
+\section{Literature study}
+NIDS systems inherently belong to the category of classification problems: determine whether a particular network traffic is benign or malicious.
+
+One of the first implementations of a Network Intrusion Detection System (NIDS) has been NADIR (Network Anomaly Detection and Intrusion Reporter) \cite{nadir} from 1990. This system was developed for the Integrated Computing Network at Los Alamos National Laboratory to automate the detection of unauthorized access to the system. NADIR utilized statistical profiles of network users to detect anomalies, notifying and printing out abnormalities in the profiles as detected by manually designed expert rules.
+
+NADIR is an example of what we call "expert-made NIDS": It follows a strict set of rules to detect and report unauthorized activity, programmed by an expert. While these systems work well as first lines of defense, they also suffer from a fundamental flaw: they can only detect what they were specifically programmed by their creators to detect. This is a difficult task: given the sheer amount of information going through the network at any particular time, one does not (or can not) know which pieces of data point to malicious traffic. Furthermore, malicious packets in one context may be harmless in another. 
+
+Instead of having to manually preprogram the NIDS with attack profiles, machine learning (ML) allows us a model to learn what (in our case) malicious traffic looks like by observing examples of benign and malicious traffic, leading directly to the concept of ML-NIDS: Machine Learning-based Network Intrusion Detection System.
+
+In general, ML-NIDS can be split into two subgroups: signature-based and anomaly based. Signature-based ML-NIDS is trained to
+
+\subsection{Machine Learning methods}
+Machine-learning methods are a class of algorithms that have the computer infer relations and rules of a dataset by being exposed to training samples. As our focus is network intrusion detection, we focus on methods that perform classification: determination whether a particular sample is malicious or benign. These methods can generally be subdivided into two categories: Shallow Learning and Deep Learning. 
+
+\subsubsection{Shallow Learning}
+Some of the most widely known and used machine learning algorithms are:
+\begin{enumerate}
+    \item K-Nearest Neighbours (KNN) \cite{knn}: Initially developed by Fix and Hodges in 1951 \cite{fix_hodges} and later improved by Cover and Hart in 1967 \cite{knn}, these models can be used for multiclass classification. Predictions are formed by a majority vote, where the label of samples most similar to the input is the prediction.
+    \item Support Vector Machines (SVM) \cite{svm}: SVMs, originally developed by Cortes and Vapnik in 1995, are models used for binary classification. The model learns to distinguish between two labels by transforming inputs into a high-dimensional space. In this "feature" space, a hyperplane can be constructed to distinguish between the two labels. The binary classification can be extended into n-label classification by training a separate SVM (target label vs anything else) for each label and perform classification by having each SVM predict the label, with a unique SVM predicting its assigned label instead of "anything else".
+    \item Decision Trees (DT) \cite{decision_trees}: Decision trees form a tree data structure, with each internal node testing for a particular feature in the data, reaching a class label in one of the leaf nodes.
+    \item Ensemble methods \cite{ensemble}: Ensemble methods combine multiple simpler classifiers to form a larger one. This way, weaknesses of the underlying classifier (e.g. an SVM being unable to separate multiple classes) can be overcome (a separate SVM being trained for each class label, as described above).
+\end{enumerate}
+
+Liao and Vemuri \cite{knn_2002} use a KNN classifier for intrusion detection by building a profile of the input process consisting of the occurrences of system calls the process performs.
+
+Sahu and Mehtre \cite{j48_dt} implement the J48 Decision Tree, testing it on Kyoto 2006+ dataset. Their trained model boasts 97.23\% accuracy and a true positive rate of 99\% for normal and attack packets.  
+
+Bao, Xu and Hou \cite{nids_svm} build an NIDS system consisting of two SVM models: one for anomaly detection, the other for misuse detection using previously seen attack signatures. Authors do make claims about "high training rate and decision rate, insensitiveness to dimensions of input data, continuous correction of various parameters with increase in training data which endows the system with self-learning ability, and so on.", yet they do not support this with figures, measurements or experiment setup. 
+
+\subsubsection{Deep Learning methods}
+
+Deep Learning methods are a subset of machine learning methods that utilize neural networks for learning. Neural networks consist of artificial neurons: nodes that have a particular activation function. Similarly to biological systems, these nodes are connected together to form layers. Inputs propagate through the layers and result in some activation in the final layer \cite{neural_networks}. For the purposes of classification, this final layer could, for example, consist of one neuron for each classification class.
+
+Depending on the network topology and the layers utilized, different models arise. \cite{deep_learning}
+\begin{itemize}
+    \item Fully connected network: The most general case, where each layer of neurons is fully connected to every other neuron in the previous layer. In order to perform any kind of advanced classification, handcrafted features need to be extracted, making these models difficult to work with in areas where irrelevant details should be ignored (e.g. the position of a dog in the image), yet small details matter for classification (e.g. differences between a black dog and a black cat).
+    \item Convolutional Neural Networks (CNN): These networks are constructed to perform classification by putting together different parts of the input. The network is architectured as a series of convolutional layers and pooling layers, each progressively extracting increasingly higher-level features. Due to their ability to extract features by themselves, without expert intervention, CNNs and models based on them (such as autoencoders described below) are widely used for classification and detection.
+    \item Autoencoders: A special type of neural network, with the input being the same as the output. The network can be separated into 3 parts: a group of layers called Encoder that gradually reduces the size of layers, a latent or hidden layer, and a group of layers called a Decoder that is, essentially, the Encoder inverted. The network attempts to learn an efficient encoding of the input such that it can recreate it in the output. 
+\end{itemize}
+
+Song et al. \cite{analysis_autoencoders} perform an analysis of autoencoders in ML-NIDS, where an autoencoder is trained to recognize normal behaviour. Any input that the autoencoder fails to recreate below a particular error margin is classified as malicious. 
+
+Pham et al. \cite{nids_cnn} propose a six-layer 1D CNN model, consisting of four convolutional layers and two fully connected layers. They compare this model with different Shallow Learning models (Gaussian Naïve Bayes, Logistic Regression, KNN, SVM, AdaBoost, Gradient Boosting, XGBoost, CatBoost, LightGBM) and show that their CNN model outperforms them on the UNSW-NB15\cite{unsw-nb15} and NSL-KDD \cite{nsl-kdd} datasets, achieving 99.3\% accuracy on UNSW-NB15 and 99.43\% accuracy on NSL- KDD.
+\subsection{Dataset quality}
+Accuracy of AI models is heavily dependent on high-quality data: the well-known principle of "garbage in, garbage out" applies. High-quality datasets are therefore imperative for well-performing models, not only on the dataset, but also in general networks. Some of the most popular NIDS datasets (according to citations\footnote{As observed on Google Scholar on 03-05-2025}) are:
+\begin{itemize}
+    \item CIC-IDS2017/CSE-CIC-IDS2018 \cite{cic_2017, cic_2018} (4623 citations): CIC-2017 dataset and its cousin CIC-2018 are all-purpose NIDS datasets, comprising of seven different attack classes executed over the course of multiple days. CIC-2017 is the base, comprising 14 hosts, while CIC-2018 is much larger in scale, being implemented on Amazon Web Services where a realistic company network is simulated: fifty attacker machines, 420 victim machines spread over five departments and thirty servers, 500 machines in total. 
+    \item ISCX IDS 2012 \cite{iscx_ids_2012} (1558 citations): A predecessor to CIC-2017, ISCX IDS 2012 implements its attacks as overlapping "scenarios" defined as unambiguous $\alpha$ and $\beta$ profiles, focusing on HTTP, SMTP/IMAP, FTP and SSH traffic. 
+    \item UNSW-NB15 \cite{unsw-nb15} (4001 citations): UNSW-NB15 dataset is built using the IXIA attack generator on a testbed consisting of three virtual servers, two for normal traffic and one for attacks.
+\end{itemize}
+
+However, many issues have been found with these datasets. 
+
+Engelen et al. \cite{troubleshooting_cic2017} analysed CIC-2017 dataset in depth and found numerous issues: "misimplementation of DoS Hulk attack, misunderstanding of the TCP protocol in flow construction ...", but also a "lack of documentation concerning flow construction and parameters of attacks".  
+
+Similarly, Flood et al. \cite{bad_design_smells} found issues with UNSW-NB15, concluding that "without modification, UNSW NB15 is unsuitable for evaluating the ability of classifiers to generalise between attack categories". They, too, note lacking documentation in other datasets (ToN\_IoT, UNSW-NB15 and CIC-2017/18).
+
+\subsection{ConCap}
+A prevailing trend in NIDS dataset construction is the usage of physical networks and testbeds. While useful, these datasets have inherent constraints that limit their usability. 
+
+First, these datasets are difficult, if not impossible, to reproduce. Researchers cannot always invest the time and resources to rebuild the networks utilized in the datasets and are therefore forced to "trust" the dataset authors that the methodology they utilise in the construction is not flawed. The lack of documentation found with some datasets further hinders their reproducibility and, ultimately, trust in these datasets.
+
+Second, any potential errors that may have slipped into the dataset cannot be easily corrected by reconstructing it. As an example, we mention the misimplementation of DoS Hulk attack found by \cite{troubleshooting_cic2017}. Due to the lack of code or precise descriptions of attack execution, we are left to guess what specific version of Hulk was used and with what configuration. While this example is easy to correct, it nevertheless shows a possibility of errors slipping into datasets that NIDS practitioners might not notice at first. 
+
+The ConCap tool by Verkerken et al. \cite{concap} has been proposed as a new method for ML-NIDS dataset generation. ConCap generates traffic using scenario files using a Kubernetes cluster, in which the targets are specified as Docker containers. This method solves both abovementioned limitations at once: reproducibility is guaranteed, as the dataset does not only consist of traffic capture files, but primarily of scenario files. Furthermore, the dataset can be easily extended with new attack classes or variants of existing attack classes, down to individual options with which the attack tools are configured. 
+
+Verkerken et al. have previously verified these properties by simulations with the Bruteforce attack class, where a model was unable to correctly identify NetFlows coming from \texttt{patator -P=0} configuration, but after retraining with this configuration, the model was able to identify it without losing its ability to detect attacks with \texttt{patator -P=1} option.
+
+This work builds on this research by almost fully translating the CIC-2017 dataset to ConCap scenarios.

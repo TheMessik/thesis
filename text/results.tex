@@ -1,0 +1,41 @@
+\section{Results}
+The processed Netflow files can be found on Kaggle. We perform the verification experiment for each attack class separately. Below we report the results of our experiments. Depending on the traffic the model was trained on, we find different sets of Top 10 features that held most predictive power. We do note that both sets contain common features, and suggest that these features are most representative of the underlying traffic, and consequently should be used as decision features for actual ML-NIDS systems. In tables below, we report these features and the respective ROC AUC scores for models that were trained on CIC traffic (second column) and on ConCap traffic (third column).
+
+\begin{table}[h!]
+	\begin{tabular}{ |c|c|c| }
+		 \hline
+		Feature & ROC AUC CIC & ROC AUC ConCap \\
+		 \hline
+		Average Packet Size & 0.976373 & 0.979104\\
+		Packet Length Mean & 0.976373 & 0.979104\\
+		Packet Length Max & 0.975831 & 0.974824\\
+		Subflow Fwd Bytes & 0.973817 & 0.975453\\
+		Fwd Packet Length Mean & 0.973565 & 0.973691\\
+		Bwd RST Flags & 0.972814 & 0.983510\\
+		Bwd Segment Size Avg & 0.971299 & 0.974572\\
+		Bwd Packet Length Mean & 0.971299 & 0.974572\\
+		Bwd Packet Length Max & 0.970040 & 0.974950\\
+		 \hline
+	\end{tabular}
+	\caption{ROC scores FTP Bruteforce}
+	\label{table:bruteforce_ftp}
+\end{table}
+
+\begin{table}[h!]
+	\begin{tabular}{ |c|c|c| }
+		\hline
+		Feature & ROC AUC CIC & ROC AUC ConCap \\
+		\hline
+		Fwd Seg Size Min & 0.920373 & 0.919959\\
+		Fwd IAT Min & 0.867556 & 0.849206\\
+		SYN Flag Count & 0.804965 & 0.816278\\
+		Bwd Packet Length Mean & 0.795103 & 0.844140\\
+		Bwd Segment Size Avg & 0.795103 & 0.844140\\
+		\hline
+	\end{tabular}
+	\caption{ROC scores SSH Bruteforce}
+	\label{table:bruteforce_ssh}
+\end{table}
+
+
+
