@@ -1,41 +1,23 @@
 \section{Results}
-The processed Netflow files can be found on Kaggle. We perform the verification experiment for each attack class separately. Below we report the results of our experiments. Depending on the traffic the model was trained on, we find different sets of Top 10 features that held most predictive power. We do note that both sets contain common features, and suggest that these features are most representative of the underlying traffic, and consequently should be used as decision features for actual ML-NIDS systems. In tables below, we report these features and the respective ROC AUC scores for models that were trained on CIC traffic (second column) and on ConCap traffic (third column).
+The processed Netflow files can be found on Kaggle. We perform the verification experiment for each attack class separately. 
 
-\begin{table}[h!]
-	\begin{tabular}{ |c|c|c| }
-		 \hline
-		Feature & ROC AUC CIC & ROC AUC ConCap \\
-		 \hline
-		Average Packet Size & 0.976373 & 0.979104\\
-		Packet Length Mean & 0.976373 & 0.979104\\
-		Packet Length Max & 0.975831 & 0.974824\\
-		Subflow Fwd Bytes & 0.973817 & 0.975453\\
-		Fwd Packet Length Mean & 0.973565 & 0.973691\\
-		Bwd RST Flags & 0.972814 & 0.983510\\
-		Bwd Segment Size Avg & 0.971299 & 0.974572\\
-		Bwd Packet Length Mean & 0.971299 & 0.974572\\
-		Bwd Packet Length Max & 0.970040 & 0.974950\\
-		 \hline
-	\end{tabular}
-	\caption{ROC scores FTP Bruteforce}
-	\label{table:bruteforce_ftp}
-\end{table}
+To quantify the performance of the trained models for different features, we calculate following metrics:
 
-\begin{table}[h!]
-	\begin{tabular}{ |c|c|c| }
-		\hline
-		Feature & ROC AUC CIC & ROC AUC ConCap \\
-		\hline
-		Fwd Seg Size Min & 0.920373 & 0.919959\\
-		Fwd IAT Min & 0.867556 & 0.849206\\
-		SYN Flag Count & 0.804965 & 0.816278\\
-		Bwd Packet Length Mean & 0.795103 & 0.844140\\
-		Bwd Segment Size Avg & 0.795103 & 0.844140\\
-		\hline
-	\end{tabular}
-	\caption{ROC scores SSH Bruteforce}
-	\label{table:bruteforce_ssh}
-\end{table}
+\begin{itemize}
+	\item \textbf{Recall}: Recall expresses the correctness of model predictions on positive samples as a ratio of true positives with respect to all positive samples: $$ \frac{TP}{TP+FN} $$
+	\item \textbf{Accuracy}: a metric expressing the correctness of predictions of a model as a ratio of the correct predictions and total predictions $$\frac{TP + TN}{TP + TN + FN + FP} $$
+	\item \textbf{Precision}: Precision describes how precise the model is in its positive predictions, calcualted as a ratio of true positives and all predicted positives: $$ \frac{TP}{TP+FP} $$
+	\item \textbf{Area Under Receiver Operator Characteristic Curve (ROC AUC) score}: By calculating the True Positive Rate and False Positive Rate of the model at set intervals, a curve can be plot through them. Area under this curve expresses how the probability of the model predicting a random malicious sample as malicious. 
+	
+\end{itemize}
 
+In graphs below, we visualize these metrics for each attack class. Depending on the traffic the model was trained on (Either original CIC-IDS-2017 or ConCap scenarios), we find different sets of features that hold most predictive power. We do note that common features can be found in these sets, and suggest that these features are most representative of the underlying traffic. Consequently, it is these common features that should be used as decision features for actual ML-NIDS systems and we only visualize these features. 
 
+The presence and absence of particular features is a peculiar artifact. We speculate that this can be explained by the difference in the methodology of dataset creation. Our reasons for this are threefold. 
+
+First, though ConCap allows for network features configuration, from bandwidth to packet corruption rate; we have insufficient information about the network conditions of the CIC-IDS-2017 dataset. For this reason, we opt to use the example configuration provided by ConCap authors and keep these conditions the same for all scenarios. 
+
+Second, ConCap networks are built fully in-silico and thus do not suffer from the same artifacts as physical networks might: arbitrary delay in packet processing, faulty connections or interference, as well as processing delay. ConCap network architecture is, without introduction of artificial defects, the perfect network.  
+
+Third, the attacks in the CIC-IDS-2017 dataset take place in addition to benign, background traffic, leading to highly imbalanced datasets. We manually balance the training and testing datasets by including known benign flows to achieve class balance. While this should have little effect on features focusing on the size and content of packets (e.g. Packet Length or Flags features), it will have an effect on features that are more concerned with timings (e.g. Flow Bytes/s or Idle features), as the benign flows had no way of influencing attack flows during traffic capture. 
 

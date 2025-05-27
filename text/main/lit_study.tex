@@ -44,16 +44,16 @@ Pham et al. \cite{nids_cnn} propose a six-layer 1D CNN model, consisting of four
 \subsection{Dataset quality}
 Accuracy of AI models is heavily dependent on high-quality data: the well-known principle of "garbage in, garbage out" applies. High-quality datasets are therefore imperative for well-performing models, not only on the dataset, but also in general networks. Some of the most popular NIDS datasets (according to citations\footnote{As observed on Google Scholar on 03-05-2025}) are:
 \begin{itemize}
-    \item CIC-IDS2017/CSE-CIC-IDS2018 \cite{cic_2017, cic_2018} (4623 citations): CIC-2017 dataset and its cousin CIC-2018 are all-purpose NIDS datasets, comprising of seven different attack classes executed over the course of multiple days. CIC-2017 is the base, comprising 14 hosts, while CIC-2018 is much larger in scale, being implemented on Amazon Web Services where a realistic company network is simulated: fifty attacker machines, 420 victim machines spread over five departments and thirty servers, 500 machines in total. 
-    \item ISCX IDS 2012 \cite{iscx_ids_2012} (1558 citations): A predecessor to CIC-2017, ISCX IDS 2012 implements its attacks as overlapping "scenarios" defined as unambiguous $\alpha$ and $\beta$ profiles, focusing on HTTP, SMTP/IMAP, FTP and SSH traffic. 
+    \item CIC-IDS-2017/CSE-CIC-IDS2018 \cite{cic_2017, cic_2018} (4623 citations): CIC-IDS-2017 dataset and its cousin CSE-CIC-2018 are all-purpose NIDS datasets, comprising of seven different attack classes executed over the course of multiple days. CIC-IDS-2017 is the base, comprising 14 hosts, while CSE-CIC-2018 is much larger in scale, being implemented on Amazon Web Services as a simulation of a realistic company network: fifty attacker machines, 420 victim machines spread over five departments and thirty servers, 500 machines in total. 
+    \item ISCX IDS 2012 \cite{iscx_ids_2012} (1558 citations): A predecessor to CIC-IDS-2017, ISCX IDS 2012 implements its attacks as overlapping "scenarios" defined as unambiguous $\alpha$ and $\beta$ profiles, focusing on HTTP, SMTP/IMAP, FTP and SSH traffic. 
     \item UNSW-NB15 \cite{unsw-nb15} (4001 citations): UNSW-NB15 dataset is built using the IXIA attack generator on a testbed consisting of three virtual servers, two for normal traffic and one for attacks.
 \end{itemize}
 
 However, many issues have been found with these datasets. 
 
-Engelen et al. \cite{troubleshooting_cic2017} analysed CIC-2017 dataset in depth and found numerous issues: "misimplementation of DoS Hulk attack, misunderstanding of the TCP protocol in flow construction ...", but also a "lack of documentation concerning flow construction and parameters of attacks".  
+Engelen et al. \cite{troubleshooting_cic2017} analysed CIC-IDS-2017 dataset in depth and found numerous issues: "misimplementation of DoS Hulk attack, misunderstanding of the TCP protocol in flow construction ...", but also a "lack of documentation concerning flow construction and parameters of attacks".  
 
-Similarly, Flood et al. \cite{bad_design_smells} found issues with UNSW-NB15, concluding that "without modification, UNSW NB15 is unsuitable for evaluating the ability of classifiers to generalise between attack categories". They, too, note lacking documentation in other datasets (ToN\_IoT, UNSW-NB15 and CIC-2017/18).
+Similarly, Flood et al. \cite{bad_design_smells} found issues with UNSW-NB15, concluding that "without modification, UNSW NB15 is unsuitable for evaluating the ability of classifiers to generalise between attack categories". They, too, note lacking documentation in other datasets (ToN\_IoT, UNSW-NB15 and CIC-IDS-2017/CSE-CIC-18).
 
 \subsection{ConCap}
 A prevailing trend in NIDS dataset construction is the usage of physical networks and testbeds. While useful, these datasets have inherent constraints that limit their usability. 
@@ -66,4 +66,4 @@ The ConCap tool by Verkerken et al. \cite{concap} has been proposed as a new met
 
 Verkerken et al. have previously verified these properties by simulations with the Bruteforce attack class, where a model was unable to correctly identify NetFlows coming from \texttt{patator -P=0} configuration, but after retraining with this configuration, the model was able to identify it without losing its ability to detect attacks with \texttt{patator -P=1} option.
 
-This work builds on this research by almost fully translating the CIC-2017 dataset to ConCap scenarios.
+This work builds on this research by almost fully translating the CIC-IDS-2017 dataset to ConCap scenarios.
