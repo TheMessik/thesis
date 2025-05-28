@@ -1,12 +1,12 @@
 attacker:
-  name: ftp_patator
+  name: ssh_patator_not_persistent
   image: themessik/patator
-  atkCommand: python3 /tmp/run.py -P -d -u https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Usernames/top-usernames-shortlist.txt -p https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Passwords/Common-Credentials/Pwdb_top-1000.txt FTP $TARGET_IP
-  # atkTime: 5s # Optional: Leave empty to execute atkCommand until it finishes.
+  atkCommand: python3 /tmp/run.py -d -u https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Usernames/top-usernames-shortlist.txt -p https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Passwords/Common-Credentials/Pwdb_top-1000.txt SSH $TARGET_IP
+  # atkTime: 20s # Optional: Leave empty to execute atkCommand until it finishes.
   cpuRequest: 100m
   memRequest: 100Mi
 target:
-  name: ftp_server
+  name: ssh_server
   image: themessik/ubuntu16
   cpuRequest: 100m
   memRequest: 100Mi
@@ -24,4 +24,4 @@ network: # Optional, uses tc to emulate a realistic network and requires kernel 
 labels:
   label: 1
   category: "bruteforce"
-  subcategory: "ftp"
+  subcategory: "ssh"

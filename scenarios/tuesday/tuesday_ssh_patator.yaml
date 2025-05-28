@@ -1,7 +1,7 @@
 attacker:
   name: ssh_patator
   image: themessik/patator
-  atkCommand: python3 /tmp/run.py -d -u https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Usernames/top-usernames-shortlist.txt -p https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Passwords/Common-Credentials/Pwdb_top-1000.txt SSH $TARGET_IP
+  atkCommand: python3 /tmp/run.py -P -d -u https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Usernames/top-usernames-shortlist.txt -p https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Passwords/Common-Credentials/Pwdb_top-1000.txt SSH $TARGET_IP
   # atkTime: 20s # Optional: Leave empty to execute atkCommand until it finishes.
   cpuRequest: 100m
   memRequest: 100Mi

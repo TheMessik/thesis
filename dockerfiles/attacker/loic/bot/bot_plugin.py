@@ -26,7 +26,7 @@ class Plugin:
             message = os.environ.get("LOIC_MESSAGE", "test_test")
             useget = "useget=true" if os.environ.get("LOIC_USEGET") is not None else "useget=false"
             
-            payload = "!lazor targetip={} port={} method={} message={} {} usewait=false random=false start".format(ip, port, method, message, useget)
+            payload = "!lazor targetip={} port={} method={} message={} {} threads=50 usewait=false random=false start".format(ip, port, method, message, useget)
 
             print("Command: " + payload)
 

