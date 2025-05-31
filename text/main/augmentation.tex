@@ -1,0 +1,67 @@
+\section{Enhancing the Robustness}\label{augmentation}
+\FloatBarrier
+Model robustness refers to the model's ability to generalize to unseen samples or to variations of previously seen samples. Using ConCap, extra malicious samples and their variations can be easily generated, allowing for adversarial training of models. After having experimentally verified that ConCap can be used as a stand-in for dataset traffic, in this section, we want to investigate the effect of dataset augmentation on the robustness of models. 
+
+Our investigation starts by generating adversarial samples from three classes of attacks contained in CIC-IDS-2017:
+\begin{itemize}
+	\item \textbf{FTP Bruteforce no persistence}: By default, Patator will use persistent connections, allowing it to try multiple options over single established connection. This bandwidth-saving measure is widely used on the web to increase communication speed. By turning connection persistence off, we force Patator to only try a single username-password combination before closing the connection.
+	\item \textbf{DoS GoldenEye POST}: The attacks with GoldenEye in CIC-IDS-2017 dataset are conducted using the HTTP verb GET. For this adversarial class, we use the HTTP POST verb instead.
+	\item \textbf{DDoS LOIC UDP}: By default, LOIC performs DoS attacks using TCP traffic, but provides an option to conduct an attack with UDP as well, which we utilise in this adversarial sample.
+\end{itemize}
+
+With the adversarial samples ready, we first establish a baseline in order to quantify the impact of adversarial training on model performance. Our methodology is similar to the methodology described in Section \ref{verification}: we use the CIC-IDS-2017 traffic as a training set and the adversarial samples as a testing set, balancing both with benign flows as previously described. 
+
+We train a model on the training set and record its performance on the testing set, using the best performing feature as found in Section \ref{verification}. Table \ref{tab:baseline} shows the recorded baselines for each of the adversarial samples.
+
+\begin{table}
+	\caption{Dataset augmentation baseline ROC AUC scores}
+	\centering
+	\begin{tabular}{|c|c|}
+		\hline
+		Attack class & Baseline \\
+		\hline
+		FTP No Persistence & 0.4982 \\
+		GoldenEye POST & 0.48923\\
+		LOIC UDP & 0.30098\\
+		\hline
+	\end{tabular}
+	\label{tab:baseline}
+\end{table}
+
+We can see that the model performs very poorly on these adversarial samples, having at worst 30\% probability of predicting a LOIC UDP attack correctly; the probability of predicting either non-persistent FPT bruteforce or GoldenEye POST DoS attack is no better than a coinflip. 
+
+Having established a baseline, we prepare a training set that consists of a mix between CIC-IDS-2017 traffic and adversarial traffic, using a 50\% train-test split of adversarial samples. We retrain the model and measure its performance again. Table \ref{tab:adversarial} extends Table \ref{tab:baseline} with the performance of this adversarially-trained model and the difference in the two models. We see clear improvements in model performance, showing that ConCap can indeed be used for adversarial training of models to increase their robustness.
+
+\begin{table}
+	\caption{Dataset augmentation: Baseline + Adversarial ROC AUC scores}
+	\centering
+	\begin{tabular}{|c|c|c|c|}
+		\hline
+		Attack class & Baseline & Adversarial & Difference\\
+		\hline
+		FTP No Persistence & 0.49822 & 0.59236 & 0.09414\\
+		GoldenEye POST & 0.4887 & 0.8454 & 0.35671\\
+		LOIC UDP & 0.2951 & 0.78802 & 0.49292\\
+		\hline
+	\end{tabular}
+	\label{tab:adversarial}
+\end{table}
+
+However, these results would be worthless if the model's ability to predict original traffic would be diminished. As a last test, we also verify that this is not the case, by having both baseline and adversarial models also predict the testing portion of the CIC-IDS-2017 dataset, without adversarial flows mixed in. The results of this experiment are presented in Table \ref{tab:sanity}.
+
+It is interesting to see that the change of protocol did cause GoldenEye model to reduce its predictive power by 13.8\% on average. However, this is to be expected, as this variant of the attack has more drastic implications for the underlying traffic than the other adversarial samples. It is positive to see that the other two adversarially trained models maintain their performance. From all this, we can conclude that ConCap can be feasibly used for adversarial training of models, increasing their robustness against variants of attacks.
+
+\begin{table}
+	\centering
+	\caption{Dataset augmentation: Baseline + Adversarial ROC AUC Scores on CIC-IDS-2017}
+	\begin{tabular}{|c|c|c|c|}
+		\hline
+		Attack class & Baseline & Adversarial & Difference\\
+		\hline
+		FTP No Persistence & 0.99577 & 0.99615 & 0.00038\\
+		GoldenEye POST & 0.98522 & 0.84716 & -0.13807\\
+		LOIC UDP & 0.78831 & 0.78879 & 0.00048\\
+		\hline
+	\end{tabular}
+	\label{tab:sanity}
+\end{table}

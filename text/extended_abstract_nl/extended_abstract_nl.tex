@@ -1,0 +1,217 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{array, booktabs}
+%\usepackage{hyperref}
+\usepackage{makecell}
+\renewcommand\theadfont{\bfseries}
+\usepackage[backend=bibtex8]{biblatex}
+\addbibresource{references.bib}
+
+\renewcommand*{\contentsname}{}
+
+\usepackage{xcolor}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+		T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\begin{document}
+	
+	\title{Verbetering van de Robuustheid van Netwerkintrusiedetectie via Data-Augmentatie:\\ een Onderzoek van CIC-IDS-2017}
+		
+	\author{
+		\IEEEauthorblockN{Jozef Jankaj, Miel Verkerken, Laurens~D’hooge, Tim~Wauters, Bruno~Volckaert\\ }
+		\IEEEauthorblockA{IDLab, Department of Information Technology at Ghent University - imec, Ghent, Belgium \\
+			\{jozef.jankaj, miel.verkerken, laurens.dhooge, tim.wauters, bruno.volckaert\}@UGent.be \\}
+	}
+	
+	\maketitle
+	\pagestyle{plain}
+	\pagenumbering{arabic}
+	
+	\begin{abstract}
+		Naarmate onze wereld steeds meer met elkaar verbonden raakt, worden onze netwerken bedreigd vanuit meer bronnen dan ooit tevoren. Bestaande beveiligingsmaatregelen hebben moeite om gelijke tred te houden met de snel evoluerende dreigingen in de cyberwereld, wat snelle verbeteringen noodzakelijk maakt. Een mogelijke weg naar verbetering is het gebruik van op machine learning gebaseerde netwerk-inbraakdetectiesystemen (ML-NIDS), die geautomatiseerde bescherming aan netwerken bieden. De bruikbaarheid van deze modellen neemt echter snel af naarmate nieuwe vormen van aanvallen worden ontdekt, en hun robuustheid is twijfelachtig bij het omgaan met variaties van aanvallen. In dit artikel verkennen we een nieuwe methode om de robuustheid van NIDS-modellen te vergroten door middel van datasetverrijking met behulp van ConCap.
+	\end{abstract}
+	
+	\section{Introductie}
+	Met de opkomst van het internet zijn fysieke bedreigingen voor onze veiligheid overgeslagen naar de virtuele wereld. Onze privacy wordt voortdurend bedreigd naarmate we er steeds meer van opgeven ten behoeve van het gemak dat de onderling verbonden wereld biedt. Tal van kwaadwillenden zijn maar al te bereid om aan te vallen, te stelen en onze systemen te vernietigen. Om deze dreiging, als een zwaard van Damocles, het hoofd te bieden, is netwerkbeveiliging een belangrijk onderwerp van onderzoek geworden. Hoewel er aanzienlijke vooruitgang is geboekt in netwerkbeveiliging dankzij verbeteringen in berichtversleuteling, de implementatie van firewalls en algemene beveiligingspraktijken, blijven aanvallen op onze netwerken frequent voorkomen. Tijdige detectie en onderbreking van deze aanvallen is van cruciaal belang om de vertrouwelijkheid, integriteit en beschikbaarheid van onze netwerken te waarborgen.
+	
+	Een Netwerk Intrusie Detectie Systeem (NIDS) dient dit doel door het netwerkverkeer te monitoren en alarm te slaan bij de detectie van kwaadaardig verkeer. Bestaande systemen \cite{snort, suricata, zeek} worden geïmplementeerd op basis van voorgeprogrammeerde regels en kenmerken van het verkeer. De snelle evolutie van cybersecurity maakt deze systemen echter al snel ineffectief, omdat voortdurend nieuwe aanvallen en varianten van bestaande aanvallen worden ontdekt en uitgevoerd. Om deze en andere redenen hebben onderzoekers hun aandacht gericht op op Machine Learning gebaseerde NIDS systemen (ML-NIDS). Zowel klassieke, shallow-learning methoden \cite{knn_2002, j48_dt, nids_svm} als deep learning-methoden \cite{nids_cnn, analysis_autoencoders} zijn eerder in de literatuur onderzocht. Deze methoden zijn sterk afhankelijk van de kwaliteit van de data waarop deze modellen getrained worden, en daarom zijn er diverse datasets \cite{cic_2017, cic_2018, unsw-nb15, iscx_ids_2012} ontwikkeld en voorgesteld als benchmark voor ML-NIDS-onderzoek.
+	
+	Helaas is gebleken dat deze datasets fouten bevatten \cite{troubleshooting_cic2017, bad_design_smells}, wat hun bruikbaarheid vermindert. Problemen zoals gebrekkige documentatie, foutieve implementaties van aanvallen en onjuiste labeling zijn aan het licht gekomen, met als resultaat enige terughoudendheid van netwerkbeheerders in het implementeren van deze modellen \cite{sok_pragmatic_assessment}.
+	
+	Om deze en andere knelpunten aan te pakken, is het ConCap-framework \cite{concap} ontwikkeld en ingezet. Dit maakt gebruik van de kracht van Kubernetes-clusters om netwerken in-silico op te bouwen, aanvallen erop uit te voeren en verkeer vast te leggen ten behoeve van datasetcreatie. In dit artikel onderzoeken wij het gebruik van deze technologie om de robuustheid van bestaande ML-NIDS-datasets te verbeteren via datasetverrijking, waarbij de CIC-IDS-2017-dataset \cite{cic_2017} als casestudy wordt gebruikt.
+	
+	We doen dit als volgt: in Sectie \ref{dataset_reconstruction} beschrijven we ons proces van het reconstrueren van de CIC-IDS-2017-dataset in ConCap-scenario’s en de keuzes die we daarbij maken. In Sectie \ref{verification} voeren we experimenten uit met de dataset om aan te tonen dat onze reconstructie betrouwbaar en bruikbaar is. In Sectie \ref{augmentation} verkennen we mogelijke verbeteringen in modelrobuustheid via adversarial training door de CIC-IDS-2017-dataset te verrijken met ConCap-verkeer.
+	
+	\section{CIC-IDS-2017 reconstructie}\label{dataset_reconstruction}
+	De CIC-IDS-2017-dataset bestaat uit verkeersopnames gedurende een werkweek in juli 2017, waarin een testnetwerk wordt getroffen door verschillende soorten aanvallen: Bruteforce, Denial-of-Service, Heartbleed, Webaanvallen, Infiltratie, Botnet, Distributed Denial-of-Service en Portscan.
+	
+	Wij reconstrueren de aanvallen in de dataset door Docker-images te verzamelen en te schrijven voor de verschillende aanvallers en doelwitten. Door deze images te gebruiken in ConCap-scenario’s kunnen we de dataset effectief reconstrueren als PCAP-bestanden die de aanvallen representeren.
+	
+	\subsection{Maandag}
+	Op maandag vinden er geen aanvallen plaats; er is uitsluitend onschadelijke verkeer aanwezig dat is gegenereerd door het B-Profile \cite{b_profile}. Dit onschadelijke verkeer komt op alle dagen voor en fungeert als achtergrondactiviteit binnen het netwerk. Wij reconstrueren dit verkeer niet afzonderlijk, maar hergebruiken het verkeer van deze dag in onze experimenten.
+	
+	\subsection{Dinsdag}
+	FTP- en SSH-bruteforceaanvallen vinden plaats op dinsdag. Deze aanvallen worden geïmplementeerd met behulp van Patator \cite{patator}. Het is onduidelijk welke woordenlijsten de auteurs gebruiken om deze aanvallen uit te voeren; daarom kiezen wij ervoor om bekende woordenlijsten uit de SecLists-repository \cite{seclists} te gebruiken.
+	
+	\subsection{Woensdag}
+	Op woensdag vinden Denial-of-Service- en Heartbleed-aanvallen plaats. De auteurs voeren deze aanvallen uit met de tools Slowhttptest en Slowloris \cite{slowhttptest}, GoldenEye \cite{goldeneye} en HULK \cite{hulk}, waarbij elk een ander deel van het HTTP-protocol aanvalt. Wij reconstrueren deze aanvallen met de respectieve tools, waarbij we Slowhttptest hergebruiken om zowel de Slowhttptest- als de Slowloris-aanvallen te implementeren, aangezien deze tool beide ondersteunt.
+	
+	Daarnaast wordt ook misbruik gemaakt van de Heartbleed-bug \cite{heartbleed}. Wij volgen de auteurs in het gebruik van de Heartleech-tool \cite{heartleech} om de aanval uit te voeren op een kwetsbare versie 1.0.1f van de OpenSSH-server. 
+	
+	\subsection{Donderdag}
+	Webaanvallen vinden plaats op donderdag en bestaan uit drie subklassen: Bruteforce, SQL-Injection en Cross-Site Scripting. Elk van deze aanvallen wordt uitgevoerd op een onderdeel van de Damn Vulnerable Web App \cite{dvwa}, met behulp van het Selenium-framework. Aangezien we geen toegang hebben tot de oorspronkelijke code, schrijven we onze eigen Python-scripts om deze aanvallen uit te voeren.
+	
+	Op deze dag vindt ook een infiltratieaanval plaats, waarbij het slachtoffer een kwaadaardig programma downloadt en uitvoert. Dit bestand creëert een omgekeerde Meterpreter-shell naar de aanvaller, via welke een Portscan-aanval wordt uitgevoerd. Wij kiezen ervoor om deze aanval niet te reconstrueren, om twee redenen: Ten eerste beperkt het gebrek aan ondersteuning voor meerfasige aanvalsexecutie binnen ConCap onze mogelijkheid om deze aanval getrouw te reproduceren. Ten tweede vindt er weinig interessant netwerkverkeer plaats: het is het specifieke bestand dat een bestandsoverdracht kwaadaardig maakt, niet de handeling van de overdracht zelf.
+	
+	\subsection{Vrijdag}
+	Op vrijdag worden de resterende aanvalsklassen uitgevoerd.
+	Een Botnet-aanval wordt uitgevoerd met behulp van het Ares-botnet \cite{ares}. Wij nemen deze aanval niet op in onze reconstructie vanwege technische beperkingen: Ares biedt geen mogelijkheid om het botnet aan te sturen vanaf Linux-hosts, wat onze mogelijkheden om de aanval vanuit Docker-containers uit te voeren beperkt.
+	
+	Vervolgens wordt een Distributed Denial-of-Service-aanval uitgevoerd met LOIC \cite{loic}. Hoewel LOIC primair via een grafische interface wordt aangestuurd, biedt de auteur een mogelijkheid om het op afstand te aansturen via een IRC-server. Wij gebruiken de multi-target-functionaliteit van ConCap om zowel het doelwit als een IRC-server te starten. Een bot maakt verbinding met deze server en wacht tot LOIC verbindt, waarna LOIC wordt aangestuurd om de aanval uit te voeren door het kanaalonderwerp aan te passen naar het bijbehorende aanvalcommando.
+	
+	Tot slot wordt een Portscan uitgevoerd. Na analyse van het netwerkverkeer hebben wij een container samengesteld met open poorten 21, 22, 80, 139 en 445, respectievelijk wijzend naar een FTP-server, SSH-server, HTTP-server en een SMB-dienst. De portscan-aanval wordt op deze container uitgevoerd. Vanwege moeilijkheden bij het opzetten van SMB hebben wij ervoor gekozen de SMB-portscans afzonderlijk uit te voeren en het verkeer tijdens de preprocessingfase samen te voegen met de overige portscans.
+	
+	
+	\section{Experimentele verificatie}\label{verification}
+	
+	We willen eerst verifiëren of het verkeer dat door ConCap wordt gegenereerd vergelijkbare kenmerken vertoont met het fysieke verkeer in CIC-IDS-2017. Daartoe preprocessen we de gegenereerde PCAP-bestanden naar NetFlows met behulp van CICFlowmeter \cite{cicflowmeter}. CICFlowmeter extraheert meer dan tachtig kenmerken uit de verkeersopname, waarop we ML-modellen kunnen trainen. We hanteren een tweezijdige methodologie voor onze verificatie: we trainen een model op ConCap-verkeer en meten de prestaties op CIC-IDS-2017-verkeer, en omgekeerd.
+	
+	Om de betrouwbaarheid van onze experimenten te waarborgen, maken wij gebruik van de gecorrigeerde versie van CIC-IDS-2017, aangeboden door Engelen et al. \cite{troubleshooting_cic2017}, als vervanging voor de oorspronkelijke dataset van Sharafaldin et al., waarin diverse labelingsfouten zijn hersteld, met name verkeerd geïmplementeerde aanvallen.
+	
+	Voor het trainen van het model gebruiken we een beslissingsboom met een enkele root, die een enkele feature gebruikt om de beslissing op te baseren, met het Gini-criterium. Na het preprocessen van de datasets voegen we een gelijke hoeveelheid goedaardige NetFlows toe aan de aanval-NetFlows om klassebalans te bereiken. Deze goedaardige NetFlows nemen we van het verkeer van maandag in de CIC-IDS-2017, zoals hierboven al aangehaald. Vervolgens trainen we het model op elke feature afzonderlijk en meten we de nauwkeurigheid, precisie en recall, evenals de ROC AUC-score.
+	
+	We zijn op zoek naar een set features met een hoge voorspellende waarde in beide richtingen. Hoewel het wenselijk is, verwachten we niet dat de best presterende features aan beide zijden identiek zijn, omdat de onderliggende netwerken fundamenteel verschillend zijn: het ConCap-netwerk is een theoretisch perfect netwerk dat volledig in-silico is geïmplementeerd. Hoewel ConCap de mogelijkheid biedt om netwerkartefacten te configureren (pakketverlies, corruptie, vertragingen, herschikkingen...), ontbreekt deze informatie voor het CIC-IDS-2017-netwerk, waardoor reproductie onmogelijk is.
+	
+	Deze experimenten tonen de aanwezigheid van deze gemeenschappelijke kenmerken met een hoge voorspellende waarde, gemeten aan de hand van de ROC AUC-score. Uiteraard vereisen verschillende aanvallen verschillende kenmerken voor detectie. In Tabel \ref{tab:results} presenteren we de drie belangrijkste kenmerken voor elke aanvalsklasse, bepaald op basis van hun gemiddelde ROC AUC-score voor de twee experimenten.
+	
+		\begin{table}
+		\centering
+		\setlength\tabcolsep{5pt}
+		\caption{Verification Results}
+		\begin{tabular}{ m{10em}  m{10em} m{8em} }
+			\toprule
+			\thead{Attack class} & \thead{Feature} & \thead{ROC-AUC Score}\\
+			\midrule
+			
+			FTP Bruteforce & Bwd RST Flags & 0.978288 \\
+			{} & Packet Length Mean & 0.976290 \\
+			{} & Average Packet Size & 0.976290\\
+			\midrule
+			SSH Bruteforce & Fwd Seg Size Min & 0.922024\\
+			{} & Fwd IAT Min & 0.854907\\
+			{} & Bwd Segment Size Avg & 0.817511\\
+			\midrule
+			DoS Slowloris & Total TCP Flow Time & 0.910773\\
+			{} & Bwd Packet Length Max & 0.868125\\
+			{} & Total Length of Bwd Packet & 0.868125\\
+			\midrule
+			DoS Slowhttptest & Total TCP Flow Time & 0.905697\\
+			{} & Fwd IAT Min & 0.875804\\
+			{} &  Fwd IAT Total & 0.842901\\
+			\midrule
+			DoS GoldenEye & Bwd Packet Length Std & 0.939286\\
+			{} & Packet Length Variance & 0.927954\\
+			{} & Packet Length Std & 0.927954\\
+			\midrule
+			DoS HULK & Bwd Packet Length Std & 0.977942\\
+			{} & Fwd RST Flags & 0.954837\\
+			{} & Subflow Bwd Bytes & 0.951484\\
+			\midrule
+			Heartbleed & Bwd Packet Length Std & 1.000000\\
+			{} & Flow Bytes/s & 0.931818\\
+			{} & Packet Length Std & 0.905702\\
+			\midrule
+			Web Attack Bruteforce & Fwd Seg Size Min & 0.934932\\
+			{} & Fwd IAT Min & 0.891781\\
+			{} & FIN Flag Count & 0.828767\\
+			\midrule
+			Web SQL Injection & Fwd Seg Size Min & 0.884615\\
+			{} & FIN Flag Count & 0.865385\\
+			{} & Bwd IAT Min & 0.816719\\
+			\midrule
+			Web XSS & Fwd Seg Size Min & 0.930556\\
+			{} &  Bwd Packet Length Std & 0.869792\\
+			{} & Packet Length Max & 0.845486\\
+			\midrule
+			DDoS LOIC & Fwd Seg Size Min & 0.934932\\
+			{} & Fwd IAT Min & 0.860959\\
+			{} & FIN Flag Count & 0.821918\\
+			\midrule
+			Portscan & Fwd Packet Length Max & 0.949676\\
+			{} & Total Length of Fwd Packet & 0.948696\\
+			{} & Fwd Segment Size Avg & 0.947596\\
+			\midrule
+		\end{tabular}
+		\label{tab:results}
+	\end{table}
+	
+	Over het algemeen vinden we veel kenmerken die goed presteren bij beide trainingsmethoden, met regelmatig scores boven de 0,9 op de ROC AUC-score en geen enkele onder de 0,8. Het moet worden opgemerkt dat, door het geringe aantal voorbeelden van sommige klassen in CIC-IDS-2017 (Heartbleed- en Web-aanvallen), modellen van deze aanvalsklassen tekenen van overfitting vertonen. Niettemin hebben we aangetoond dat het ConCap-framework betrouwbaar kan worden gebruikt om datasets te repliceren en mogelijk uit te breiden, aangezien de modellen die zijn gebaseerd op ofwel de originele dataset ofwel het ConCap-verkeer, de andere betrouwbaar kunnen voorspellen.
+	
+	\section{Datasetaugmentatie}\label{augmentation}
+	Modelrobustheid verwijst naar het vermogen van een model om prestaties te behouden bij ongeziene voorbeelden of variaties van de eerder geziene voorbeelden. ConCap kan eenvoudig worden ingezet om de modelrobustheid te vergroten door verkeer te genereren van variaties op aanvallen.
+	
+	Na het verifiëren van het nut van ConCap als vervanger voor de CIC-IDS-2017 dataset in de vorige sectie, voeren we aanvullende experimenten uit om het effect van ConCap op de robuustheid van datasets te onderzoeken. We zijn met name geïnteresseerd in het effect van datasetaugmentatie door middel van adversariële training.
+	
+	We breiden de bestaande dataset uit met scenario’s die verschillende opties van de bestaande tools testen. Meer specifiek:
+	\begin{itemize}
+		\item \textbf{FTP Bruteforce}: Persistence uitzetten, waardoor er per verbinding slechts één poging wordt gedaan
+		\item \textbf{DoS GoldenEye}: Aanval met de POST HTTP-verb
+		\item \textbf{DDoS LOIC}: Aanval via UDP
+	\end{itemize}
+	
+	Voor elk van deze uitbreidingen genereren we het adversariële verkeer en trainen we een model op het beste kenmerk voor de betreffende klasse, zoals hierboven vastgesteld, gebruikmakend van het CIC-IDS-2017-verkeer. Vervolgens meten we de prestatie van het model op het gegenereerde adversariële verkeer met behulp van de ROC AUC-score, wat onze basislijn vormt. Daarna stellen we een combinatie samen van CIC-IDS-2017-verkeer en adversariële verkeer, hertrainen we het model en meten we opnieuw de prestaties. Net als in de experimenten in de vorige sectie, balanceren we de trainings- en testsets met willekeurige samples van goedaardig verkeer uit de maandagse verkeerstrace van CIC-IDS-2017.
+	
+	\begin{table}
+		\centering
+		\caption{Average ROC AUC Scores for different attacks}
+		\begin{tabular}{ c  c  c  c }
+			\toprule
+			\thead{Attack class} & \thead{Baseline} & \thead{Adversarial} & \thead{Difference}\\
+			\midrule
+			FTP no persistence & 0.4982 & 0.59236 & 0.09416\\
+			GoldenEye POST & 0.48923 & 0.84631 & 0.35708\\
+			LOIC UDP & 0.30098 & 0.78868 & 0.4877\\
+			\bottomrule
+		\end{tabular}
+		\label{tab:adversarial_roc}
+	\end{table}
+	
+	In Tabel \ref{tab:adversarial_roc} rapporteren we de gemiddelde ROC AUC-scores voor de verschillende extensies over tien runs. Alle modellen presteren aanvankelijk slecht, met minder dan 50\% kans om een willekeurig kwaadaardig sample correct als kwaadaardig te classificeren. Deze kans neemt aanzienlijk toe na adversariële training. Onze resultaten tonen aan dat ConCap effectief kan worden ingezet voor het vergroten van de robuustheid van ML-NIDS-modellen.
+	
+	Tot slot voeren we een sanity check-experiment uit om de modelprestaties op originele samples na adversariële training te evalueren. De adversariële training zou van weinig meerwaarde zijn als de modelprestaties op de originele dataset erdoor significant verslechteren. Dit wordt getest door gebruik te maken van de test-split van het CIC-IDS-2017-verkeer, waarbij het adversariële model deze samples voorspelt. Tabel \ref{tab:sanity} toont onze bevindingen.
+	
+	We zien geen significante prestatievermindering bij de modellen voor FTP No Persistence en LOIC UDP, maar we merken wel een degradatie op bij het GoldenEye POST-model. Wij vermoeden dat dit komt doordat de adversariële wijziging bij deze klasse ingrijpender is dan bij de andere twee. Desondanks behoudt het model zijn voorspellende kracht met een ROC AUC-score boven de 0,8, waaruit we concluderen dat het model bruikbaar blijft.
+	
+		\begin{table}
+		\centering
+		\caption{Dataset augmentation: Baseline + Adversarial ROC AUC Scores on CIC-IDS-2017}
+		\begin{tabular}{llll}
+			\toprule
+			\thead{Attack class} & \thead{Baseline} & \thead{Adversarial} & \thead{Difference}\\
+			\midrule
+			FTP No Persistence & 0.99577 & 0.99615 & 0.00038\\
+			GoldenEye POST & 0.98522 & 0.84716 & -0.13807\\
+			LOIC UDP & 0.78831 & 0.78879 & 0.00048\\
+			\bottomrule
+		\end{tabular}
+		\label{tab:sanity}
+	\end{table}
+	
+	\section{Conclusie}
+	Dit artikel presenteert een casestudy van een nieuwe methode voor het verbeteren van de robuustheid van ML-NIDS-systemen door middel van datasetaugmentatie.
+	
+	Na een analyse van CIC-IDS-2017 hebben we ConCap gebruikt om de aanvallen in deze dataset te reconstrueren. Met behulp van beslissingsbomen hebben we experimenteel aangetoond dat het gegenereerde verkeer als vervanging van de dataset kan dienen, waarbij modellen hoge nauwkeurigheid bereiken.
+	
+	Tot slot hebben we drie variaties van bestaande aanvallen geconstrueerd en aangetoond dat de modellen adversariëel getraind kunnen worden om deze nieuwe aanvallen te herkennen.
+	
+	\section{Toekomstig onderzoek}
+	Voortbouwend op dit artikel kan vervolgonderzoek zich richten op het ondersteunen van uitgebreidere netwerkarchitecturen en scenario’s, aangezien ConCap op dit vlak nog vrij beperkt is. Daarnaast kan ConCap worden ingezet als simulatieomgeving, wat een uitstekende basis biedt voor training en oefening van blue teams, evenals voor het modelleren van nieuwe aanvallen door red teams. Tot slot kunnen real-time uitbreidingen van ML-NIDS-systemen van waarde zijn, niet alleen voor het opbouwen van Intrusie Detectie Systemen, maar ook van Intrusie \textit{Preventie} Systemen, die aanvallen in real-time kunnen stoppen.
+	
+	
+	\section*{Referenties}
+	\printbibliography[heading=none]
+\end{document}

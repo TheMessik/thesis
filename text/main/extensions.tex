@@ -1,8 +1,0 @@
-\section{Extensions}
-
-Here we describe extensions to the attacks we have implemented as part of dataset reconstruction to show the versatility of ConCap as well as the ease of dataset augmentation. 
-
-\subsection{Tuesday attacks}
-For Tuesday attacks, we construct the image in such a way that the wordlist used can be easily exchanged for another one. The image \texttt{themessik/patator} does come prepackaged with dictionaries, but these are neither exhaustive nor useful for modelling actual bruteforce attacks. Instead, the attack command can be extended with a flag to download the dictionaries to be used. Instead of specifying the path to the wordlist inside the image, specify a link to download the dictionaries. These will then be downloaded and utilized for attack execution. 
-
-We provide example scenario showing this functionality in \path{scenarios/extensions/tuesday_download_lists.yaml}.

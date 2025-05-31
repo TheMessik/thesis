@@ -2,11 +2,14 @@
 \usepackage{graphicx} % Required for inserting images
 \usepackage{hyperref}
 \usepackage{url}
+\usepackage{placeins}
 \usepackage[backend=bibtex8]{biblatex}
+\usepackage[justification=centering]{caption}
 \addbibresource{references.bib}
 \renewcommand\refname{}
-\renewcommand*{\contentsname}{}
+%\renewcommand*{\contentsname}{}
 \graphicspath{{images}}
+\usepackage{pdfpages}
 
 \title{Enhancing Network Intrusion Detection Robustness via Dataset Augmentation: A CIC-IDS-2017 Case Study
 }
@@ -15,13 +18,18 @@
 
 
 \begin{document}
+	\includepdf[pages=-]{../title.pdf}
+	\includepdf[pages=-]{../rest/summaries.pdf}
+	\includepdf[pages=-]{../extended_abstract/extended_abstract.pdf}
+	\includepdf[pages=-]{../extended_abstract_nl/extended_abstract_nl.pdf}
+	\includepdf[pages=-]{../rest/boilerplate.pdf}
 	
-\maketitle
-
-\tableofcontents
+	\pagenumbering{roman}
+	\tableofcontents
 	
 	\newpage
-	
+	\pagenumbering{arabic}
+	\setcounter{page}{1}
 	\section{Introduction}
 	A lot of time has passed since that fateful night of October 29, 1969, when the first inter-network communication took place through the ARPANET link. In his statement in an interview with Gregory Gromov
 	
@@ -34,9 +42,9 @@
 	
 	In recent years, NIDS research has explored how the capabilities of machine learning methods can be utilized to protect our networks. While many papers claim excellent performance and groundbreaking contributions, the field of machine learning-based NIDS (ML-NIDS) has been met with skepticism by practitioners \cite{sok_nids_assessment}, chief among them being the lack of evidence of generalization to different networks.
 	
-	The aim of this work is to address this complaint by verifying a method of enhancing robustness of NIDS datasets through dataset augmentation. As a point of study, we take the CIC-2017 dataset \cite{cic_2017} created by the Canadian Institute for Cybersecurity. 
+	The aim of this work is to address this complaint by studying a method of enhancing robustness of NIDS datasets through dataset augmentation. We take the CIC-2017 dataset \cite{cic_2017} as a case study, created by the Canadian Institute for Cybersecurity. 
 	
-	This work is structured as follows: In Section 2, we explore the literature surrounding ML-NIDS, illustrating current methods and datasets used in the field. In Section 3, we formulate a hypothesis behind the poor generalization performance of ML-NIDS models, explore the CIC-2017 dataset in-depth and recreate it using ConCap \cite{concap}. In Section 4, we present results of our testing. Finally, in Section 5, we draw conclusions and reflect on future work.
+	This work is structured as follows: In Section \ref{lit_study}, we explore the literature surrounding ML-NIDS, illustrating current methods and datasets used in the field. In Section \ref{methodology}, we formulate a hypothesis behind the poor generalization performance of ML-NIDS models, explore the CIC-IDS-2017 dataset in-depth and recreate it using ConCap \cite{concap}. In Section \ref{verification}, we experimentally verify the usefulness of our reconstruction through ConCap by training an ML model. Next, in Section \ref{augmentation}, we explore a robustness enhancement of the ML model through adversarial training. Finally, in Section \ref{conclusion}, we summarize our findings and in Section \ref{future_work} we reflect on further research avenues.
 	
 	\newpage
 	\include{lit_study}
@@ -45,20 +53,21 @@
 	\include{methodology}
 	
 	\newpage
-	\include{results}
+	\include{verification}
+	
+	\newpage
+	\include{augmentation}
 	
 	\newpage
 	\include{conclusion}
 	
+	\newpage
 	\include{future_work}
-	
-	\include{extensions}
 	
 	\newpage
 	\section{References}
-	\printbibliography[heading=none]
+	\printbibliography[heading=none]	
 	\newpage
-	\section{Appendices}
-	
-	
+	\appendix
+	\include{appendix}
 \end{document}
