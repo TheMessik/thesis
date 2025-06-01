@@ -4,6 +4,7 @@
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{algorithmic}
 \usepackage{graphicx}
+\usepackage[dutch]{babel}
 \usepackage{textcomp}
 \usepackage{array, booktabs}
 %\usepackage{hyperref}
@@ -32,7 +33,7 @@
 	\pagenumbering{arabic}
 	
 	\begin{abstract}
-		Naarmate onze wereld steeds meer met elkaar verbonden raakt, worden onze netwerken bedreigd vanuit meer bronnen dan ooit tevoren. Bestaande beveiligingsmaatregelen hebben moeite om gelijke tred te houden met de snel evoluerende dreigingen in de cyberwereld, wat snelle verbeteringen noodzakelijk maakt. Een mogelijke weg naar verbetering is het gebruik van op machine learning gebaseerde netwerk-inbraakdetectiesystemen (ML-NIDS), die geautomatiseerde bescherming aan netwerken bieden. De bruikbaarheid van deze modellen neemt echter snel af naarmate nieuwe vormen van aanvallen worden ontdekt, en hun robuustheid is twijfelachtig bij het omgaan met variaties van aanvallen. In dit artikel verkennen we een nieuwe methode om de robuustheid van NIDS-modellen te vergroten door middel van datasetverrijking met behulp van ConCap.
+		Naarmate onze wereld steeds meer met elkaar verbonden raakt, worden onze netwerken bedreigd vanuit meer bronnen dan ooit tevoren. Bestaande beveiligingsmaatregelen hebben moeite om gelijke tred te houden met de snel evoluerende dreigingen in de cyberwereld, wat snelle verbeteringen noodzakelijk maakt. Een mogelijke weg naar verbetering is het gebruik van op machine learning gebaseerde netwerk intrusie detectie systemen (ML-NIDS), die geautomatiseerde bescherming aan netwerken bieden. De bruikbaarheid van deze modellen neemt echter snel af naarmate nieuwe vormen van aanvallen worden ontdekt, en hun robuustheid is twijfelachtig bij het omgaan met variaties van aanvallen. In dit artikel verkennen we een nieuwe methode om de robuustheid van NIDS-modellen te vergroten door middel van datasetverrijking met behulp van ConCap.
 	\end{abstract}
 	
 	\section{Introductie}
@@ -52,13 +53,13 @@
 	Wij reconstrueren de aanvallen in de dataset door Docker-images te verzamelen en te schrijven voor de verschillende aanvallers en doelwitten. Door deze images te gebruiken in ConCap-scenario’s kunnen we de dataset effectief reconstrueren als PCAP-bestanden die de aanvallen representeren.
 	
 	\subsection{Maandag}
-	Op maandag vinden er geen aanvallen plaats; er is uitsluitend onschadelijke verkeer aanwezig dat is gegenereerd door het B-Profile \cite{b_profile}. Dit onschadelijke verkeer komt op alle dagen voor en fungeert als achtergrondactiviteit binnen het netwerk. Wij reconstrueren dit verkeer niet afzonderlijk, maar hergebruiken het verkeer van deze dag in onze experimenten.
+	Op maandag vinden er geen aanvallen plaats; er is uitsluitend onschadelijk verkeer aanwezig dat is gegenereerd door het B-Profile \cite{b_profile}. Dit onschadelijk verkeer komt op alle dagen voor en fungeert als achtergrondactiviteit binnen het netwerk. Wij reconstrueren dit verkeer niet afzonderlijk, maar hergebruiken het verkeer van deze dag in onze experimenten.
 	
 	\subsection{Dinsdag}
 	FTP- en SSH-bruteforceaanvallen vinden plaats op dinsdag. Deze aanvallen worden geïmplementeerd met behulp van Patator \cite{patator}. Het is onduidelijk welke woordenlijsten de auteurs gebruiken om deze aanvallen uit te voeren; daarom kiezen wij ervoor om bekende woordenlijsten uit de SecLists-repository \cite{seclists} te gebruiken.
 	
 	\subsection{Woensdag}
-	Op woensdag vinden Denial-of-Service- en Heartbleed-aanvallen plaats. De auteurs voeren deze aanvallen uit met de tools Slowhttptest en Slowloris \cite{slowhttptest}, GoldenEye \cite{goldeneye} en HULK \cite{hulk}, waarbij elk een ander deel van het HTTP-protocol aanvalt. Wij reconstrueren deze aanvallen met de respectieve tools, waarbij we Slowhttptest hergebruiken om zowel de Slowhttptest- als de Slowloris-aanvallen te implementeren, aangezien deze tool beide ondersteunt.
+	Op woensdag vinden Denial-of-Service- en Heartbleed-aanvallen plaats. De auteurs voeren deze aanvallen uit met de tools Slowhttptest en Slowloris \cite{slowhttptest}, GoldenEye \cite{goldeneye} en HULK \cite{hulk}, waarbij elk een ander deel van het HTTP-protocol aanvalt. Wij reconstrueren deze aanvallen met de respectievelijke tools, waarbij we Slowhttptest hergebruiken om zowel de Slowhttptest- als de Slowloris-aanvallen te implementeren, aangezien deze tool beide ondersteunt.
 	
 	Daarnaast wordt ook misbruik gemaakt van de Heartbleed-bug \cite{heartbleed}. Wij volgen de auteurs in het gebruik van de Heartleech-tool \cite{heartleech} om de aanval uit te voeren op een kwetsbare versie 1.0.1f van de OpenSSH-server. 
 	
@@ -78,9 +79,9 @@
 	
 	\section{Experimentele verificatie}\label{verification}
 	
-	We willen eerst verifiëren of het verkeer dat door ConCap wordt gegenereerd vergelijkbare kenmerken vertoont met het fysieke verkeer in CIC-IDS-2017. Daartoe preprocessen we de gegenereerde PCAP-bestanden naar NetFlows met behulp van CICFlowmeter \cite{cicflowmeter}. CICFlowmeter extraheert meer dan tachtig kenmerken uit de verkeersopname, waarop we ML-modellen kunnen trainen. We hanteren een tweezijdige methodologie voor onze verificatie: we trainen een model op ConCap-verkeer en meten de prestaties op CIC-IDS-2017-verkeer, en omgekeerd.
+	We willen eerst verifiëren of het verkeer dat door ConCap wordt gegenereerd vergelijkbare kenmerken vertoont met het fysieke verkeer in CIC-IDS-2017. Daartoe voorbewerken we de gegenereerde PCAP-bestanden naar NetFlows met behulp van CICFlowmeter \cite{cicflowmeter}. CICFlowmeter extraheert meer dan tachtig kenmerken uit de verkeersopname, waarop we ML-modellen kunnen trainen. We hanteren een tweezijdige methodologie voor onze verificatie: we trainen een model op ConCap-verkeer en meten de prestaties op CIC-IDS-2017-verkeer, en omgekeerd.
 	
-	Om de betrouwbaarheid van onze experimenten te waarborgen, maken wij gebruik van de gecorrigeerde versie van CIC-IDS-2017, aangeboden door Engelen et al. \cite{troubleshooting_cic2017}, als vervanging voor de oorspronkelijke dataset van Sharafaldin et al., waarin diverse labelingsfouten zijn hersteld, met name verkeerd geïmplementeerde aanvallen.
+	Om de betrouwbaarheid van onze experimenten te waarborgen, maken wij gebruik van de gecorrigeerde versie van CIC-IDS-2017, aangeboden door Engelen et al. \cite{troubleshooting_cic2017}, als vervanging voor de oorspronkelijke CIC-IDS-2017 dataset van Sharafaldin et al. \cite{cic_2017}, waarin diverse labelingsfouten zijn hersteld, met name verkeerd geïmplementeerde aanvallen.
 	
 	Voor het trainen van het model gebruiken we een beslissingsboom met een enkele root, die een enkele feature gebruikt om de beslissing op te baseren, met het Gini-criterium. Na het preprocessen van de datasets voegen we een gelijke hoeveelheid goedaardige NetFlows toe aan de aanval-NetFlows om klassebalans te bereiken. Deze goedaardige NetFlows nemen we van het verkeer van maandag in de CIC-IDS-2017, zoals hierboven al aangehaald. Vervolgens trainen we het model op elke feature afzonderlijk en meten we de nauwkeurigheid, precisie en recall, evenals de ROC AUC-score.
 	
@@ -152,7 +153,7 @@
 	Over het algemeen vinden we veel kenmerken die goed presteren bij beide trainingsmethoden, met regelmatig scores boven de 0,9 op de ROC AUC-score en geen enkele onder de 0,8. Het moet worden opgemerkt dat, door het geringe aantal voorbeelden van sommige klassen in CIC-IDS-2017 (Heartbleed- en Web-aanvallen), modellen van deze aanvalsklassen tekenen van overfitting vertonen. Niettemin hebben we aangetoond dat het ConCap-framework betrouwbaar kan worden gebruikt om datasets te repliceren en mogelijk uit te breiden, aangezien de modellen die zijn gebaseerd op ofwel de originele dataset ofwel het ConCap-verkeer, de andere betrouwbaar kunnen voorspellen.
 	
 	\section{Datasetaugmentatie}\label{augmentation}
-	Modelrobustheid verwijst naar het vermogen van een model om prestaties te behouden bij ongeziene voorbeelden of variaties van de eerder geziene voorbeelden. ConCap kan eenvoudig worden ingezet om de modelrobustheid te vergroten door verkeer te genereren van variaties op aanvallen.
+	Modelrobustheid verwijst naar het vermogen van een model om prestaties te behouden bij ongeziene voorbeelden of variaties van de eerder geziene voorbeelden. Varianten van bestaande aanvallen kunnen eenvoudig gegenereerd worden via ConCap als aanvullende scnearios. 
 	
 	Na het verifiëren van het nut van ConCap als vervanger voor de CIC-IDS-2017 dataset in de vorige sectie, voeren we aanvullende experimenten uit om het effect van ConCap op de robuustheid van datasets te onderzoeken. We zijn met name geïnteresseerd in het effect van datasetaugmentatie door middel van adversariële training.
 	
@@ -206,7 +207,7 @@
 	
 	Na een analyse van CIC-IDS-2017 hebben we ConCap gebruikt om de aanvallen in deze dataset te reconstrueren. Met behulp van beslissingsbomen hebben we experimenteel aangetoond dat het gegenereerde verkeer als vervanging van de dataset kan dienen, waarbij modellen hoge nauwkeurigheid bereiken.
 	
-	Tot slot hebben we drie variaties van bestaande aanvallen geconstrueerd en aangetoond dat de modellen adversariëel getraind kunnen worden om deze nieuwe aanvallen te herkennen.
+	Tot slot hebben we drie variaties van bestaande aanvallen geconstrueerd en aangetoond dat de modellen adversarieel getraind kunnen worden om deze nieuwe aanvallen te herkennen.
 	
 	\section{Toekomstig onderzoek}
 	Voortbouwend op dit artikel kan vervolgonderzoek zich richten op het ondersteunen van uitgebreidere netwerkarchitecturen en scenario’s, aangezien ConCap op dit vlak nog vrij beperkt is. Daarnaast kan ConCap worden ingezet als simulatieomgeving, wat een uitstekende basis biedt voor training en oefening van blue teams, evenals voor het modelleren van nieuwe aanvallen door red teams. Tot slot kunnen real-time uitbreidingen van ML-NIDS-systemen van waarde zijn, niet alleen voor het opbouwen van Intrusie Detectie Systemen, maar ook van Intrusie \textit{Preventie} Systemen, die aanvallen in real-time kunnen stoppen.
